@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "music-drafts-sorter"
+name = "music_drafts_sorter"
 version = "0.1.0"
 description = ""
 authors = ["fargus plumdoodle <fargusplumdoodle@gmail.com>"]
