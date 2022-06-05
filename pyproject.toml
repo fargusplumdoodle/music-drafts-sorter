@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "music-drafts-sorter"
+version = "0.1.0"
+description = ""
+authors = ["fargus plumdoodle <fargusplumdoodle@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+arrow = "^1.2.2"
+pydub = "^0.25.1"
+
+[tool.poetry.dev-dependencies]
+flake8 = "^4.0.1"
+black = "^22.3.0"
+mypy = "^0.960"
+pytest = "^7.1.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
