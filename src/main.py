@@ -10,15 +10,17 @@ import re
 from typing import TYPE_CHECKING, List, Optional
 
 logging.basicConfig(
-    format="%(asctime)s - %(message)s", datefmt="%d-%b-%y %H:%M:%S", level=logging.INFO
+    format="%(asctime)s - %(message)s", datefmt="%d-%b-%y %H:%M:%S", level=logging.DEBUG
 )
+
+dry_run = "--dry-run" in sys.argv
 
 
 class AudioFile:
     supported_types = {"wav", "mp3", "m4a"}
 
     def __init__(self, path: str, dest_dir: str, artist="Isaac Thiessen"):
-        modified_time = arrow.get(os.path.getctime(path))
+        modified_time = arrow.get(os.path.getmtime(path))
         self.name = Path(path).name
         self.extension = os.path.splitext(path)[1]
 
@@ -33,7 +35,8 @@ class AudioFile:
         self.dest_directory = os.path.join(dest_dir, self.year, self.month)
         self.dest = os.path.join(self.dest_directory, self.name)
 
-        self.supported = self.extension in self.supported_types
+        # [1:] removes leading period
+        self.supported = self.extension[1:] in self.supported_types
 
 
 def find_audio_files(src: str, dest: str) -> "List[AudioFile]":
@@ -47,30 +50,34 @@ def find_audio_files(src: str, dest: str) -> "List[AudioFile]":
 
 
 def ensure_path(file: AudioFile):
+    if dry_run:
+        return
+
     try:
         os.makedirs(file.dest_directory)
+        logging.info(f'Created path "{file.dest_directory}"')
     except FileExistsError:
         pass
 
 
-def move_file(file: AudioFile, dry_run: bool) -> None:
-    logging.info(
-        f'{"DRY_RUN -- " if dry_run else ""}Moving: "{file.src}" to "{file.dest})"'
-    )
+def move_file(file: AudioFile) -> None:
+    ensure_path(file)
 
+    logging.info(
+        f'{"DRY_RUN -- " if dry_run else ""}Moving: "{file.src}" to "{file.dest}"'
+    )
     if not dry_run:
         shutil.move(file.src, file.dest)
 
 
-def main(src: str, dest: str, dry_run: bool) -> None:
+def main(src: str, dest: str) -> None:
     audio_files = find_audio_files(src, dest)
 
     for file in audio_files:
-        move_file(file, dry_run)
+        move_file(file)
 
 
 if __name__ == "__main__":
     src = sys.argv[1]
     dest = sys.argv[2]
-    dry_run = "--dry-run" in sys.argv
-    main(src, dest, dry_run)
+    main(src, dest)
