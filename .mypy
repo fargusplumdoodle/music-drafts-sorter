@@ -1,0 +1,7 @@
+[mypy]
+warn_unused_configs = True
+allow_redefinition = True
+mypy_path = mypy_stubs
+
+[mypy-pydub]
+ignore_missing_imports = True

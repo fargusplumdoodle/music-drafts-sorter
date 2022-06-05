@@ -10,8 +10,13 @@ RUN set -ex \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get -y auto-remove
 
+RUN set -ex \
+    && pip install -U "poetry==1.1.12"
 
-RUN mkdir /code/
+RUN useradd -ms /bin/bash service
+RUN mkdir /code/ && chown service:service /code
+USER service
+
 WORKDIR /code/
 ADD pyproject.toml /code/
 ADD poetry.lock /code/
@@ -20,11 +25,10 @@ ENV PATH=/code/.venv/bin:${PATH} \
     PIP_NO_CACHE_DIR=true
 
 RUN set -ex \
-    && pip install -U "poetry==1.1.12"  \
     && poetry config virtualenvs.in-project true \
     && poetry install --no-root --no-dev
 
 ADD src /code/
 EXPOSE 8000
 
-ENTRYPOINT ["/code/build/docker-entrypoint.sh"]
+ENTRYPOINT ["python", "main.py"]
