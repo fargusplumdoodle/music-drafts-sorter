@@ -40,6 +40,7 @@ class AudioFile:
         self.dest = os.path.join(self.dest_directory, self.tags["title"] + ".mp3")
 
         self.supported = self.extension in self.supported_types
+        self.already_exists = os.path.exists(self.dest)
 
 
 def find_audio_files(src: str, dest: str) -> "List[AudioFile]":
@@ -47,9 +48,16 @@ def find_audio_files(src: str, dest: str) -> "List[AudioFile]":
 
     for root, _, files in os.walk(src):
         for file_name in files:
-            audio_files.append(AudioFile(os.path.join(root, file_name), dest))
+            file = AudioFile(os.path.join(root, file_name), dest)
 
-    return [file for file in audio_files if file.supported]
+            if file.supported and not file.already_exists:
+                logging.info(f"Found new file: {file.src}")
+                audio_files.append(file)
+
+            elif file.already_exists:
+                logging.debug(f"Skipping existing file: {file.src}")
+
+    return audio_files
 
 
 def ensure_path(file: AudioFile):
